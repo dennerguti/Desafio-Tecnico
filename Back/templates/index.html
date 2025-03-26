@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesquisa API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .search-container {
+            margin-bottom: 30px;
+        }
+        .search-box {
+            padding: 10px;
+            width: 300px;
+            font-size: 16px;
+        }
+        .search-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .product-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+        .product-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .product-price {
+            color: green;
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pesquisa API</h1>
+    
+    <div class="search-container">
+        <form method="POST">
+            <input type="text" name="search" class="search-box" placeholder="Pesquisar produtos..." value="{{ search_query }}">
+            <button type="submit" class="search-button">Buscar</button>
+        </form>
+    </div>
+    
+    {% if products %}
+        <div class="product-grid">
+            {% for product in products %}
+                <div class="product-card">
+                    <img src="{{ product.image }}" alt="{{ product.title }}" class="product-image">
+                    <div class="product-title">{{ product.title }}</div>
+                    <div class="product-price">${{ product.price }}</div>
+                    <div class="product-category">{{ product.category }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Nenhum produto encontrado. Tente outro termo de busca.</p>
+    {% endif %}
+</body>
+</html>
