@@ -9,15 +9,22 @@
 <body>
     <div class="login-container">
         <h2>Login</h2>
-        <form action="#" method="POST">
+        <form id="loginForm">
             <label for="username">Usuário</label>
             <input type="text" id="username" name="username" required>
+            <small class="error-message"></small>
 
             <label for="password">Senha</label>
             <input type="password" id="password" name="password" required>
+            <small class="error-message"></small>
 
             <button type="submit">Entrar</button>
         </form>
+
+        <!-- Mensagem -->
+        <p id="feedback" class="hidden"></p>
     </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

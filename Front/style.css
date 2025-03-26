@@ -51,3 +51,40 @@ button {
 button:hover {
     background: #0056b3;
 }
+
+/* Mensagens de erro */
+.error-message {
+    color: red;
+    font-size: 12px;
+    height: 15px;
+    display: block;
+    text-align: left;
+    margin-bottom: 5px;
+}
+
+/* Login */
+#feedback {
+    margin-top: 15px;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+/* Sucesso */
+.success {
+    color: green;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+/* Erro */
+.failure {
+    color: red;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+
+/* Esconder feedback inicialmente */
+.hidden {
+    display: none;
+}
