@@ -4,12 +4,35 @@ import csv
 import io
 
 app = Flask(__name__)
-app.secret_key = 'sua_chave_secreta_aqui'
+app.secret_key = 'sua_chave_secreta_aqui' # Eu to usando isso? Acho que não
 
 BASE_URL = "https://fakestoreapi.com"
+USERS = {"admin": "123456"}  # Senhas não podem ficar assim
 
 @app.route('/', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        if username in USERS and USERS[username] == password:
+            session['user'] = username
+            return redirect(url_for('index'))
+        else:
+            return "Credenciais inválidas", 401 # Arrumar isso depois
+    
+    return render_template('login.html')
+
+@app.route('/logout') # Adicionar um botão para cá
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('login'))
+
+@app.route('/api', methods=['GET', 'POST'])
 def index():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    
     if 'cart' not in session:
         session['cart'] = {}
 
