@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session, send_file, redirect, url_for
+from flask import Flask, render_template, request, session, send_file, redirect, url_for
 import requests
 import csv
 import io
@@ -12,6 +12,17 @@ BASE_URL = "https://fakestoreapi.com"
 def index():
     if 'cart' not in session:
         session['cart'] = {}
+
+    search_query = request.form.get('search', '')
+
+    if search_query:
+        response = requests.get(f"{BASE_URL}/products")
+        if response.status_code == 200:
+            products = [p for p in response.json() if search_query.lower() in p['title'].lower()]
+        else:
+            products = []
+    else:
+        products = requests.get(f"{BASE_URL}/products").json()
 
     if request.method == 'POST':
         if 'add_to_cart' in request.form:
@@ -40,16 +51,15 @@ def index():
                     del session['cart'][product_id]
                 session.modified = True
 
-    products = requests.get(f"{BASE_URL}/products").json()
     cart_total = sum(item['price'] * item['quantity'] for item in session['cart'].values())
 
-    return render_template('index.html', products=products, cart=session['cart'], cart_total=cart_total)
+    return render_template('index.html', products=products, cart=session['cart'], cart_total=cart_total, search_query=search_query)
 
 @app.route('/export')
 def export_cart():
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["ID", "Título", "Preço", "Quantidade", "Imagem"])  # Adicionando imagem
+    writer.writerow(["ID", "Título", "Preço", "Quantidade", "Imagem"])
 
     for item in session['cart'].values():
         writer.writerow([item['id'], item['title'], item['price'], item['quantity'], item['image']])
@@ -67,23 +77,23 @@ def import_cart():
         return "Nenhum arquivo selecionado", 400  
 
     reader = csv.reader(io.StringIO(file.read().decode()), delimiter=",")
-    next(reader)  # Ignora o cabeçalho
+    next(reader)  
 
     for row in reader:
         if len(row) < 5:
-            continue  # Pula linhas inválidas
+            continue  
 
         product_id, title, price, quantity, image = row
         session['cart'][product_id] = {
             'id': product_id,
             'title': title,
             'price': float(price),
-            'image': image,  # Agora a imagem será carregada corretamente
+            'image': image,
             'quantity': int(quantity)
         }
 
     session.modified = True
-    return redirect(url_for('index'))  
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)

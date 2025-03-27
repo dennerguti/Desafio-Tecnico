@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,21 +19,17 @@
             width: 300px;
             font-size: 16px;
         }
-        .search-button, .cart-button, .remove-button, .export-button {
+        .search-button, .cart-button, .remove-button, .export-button, .import-button {
             padding: 10px 20px;
             font-size: 16px;
-            background-color: #4CAF50;
             color: white;
             border: none;
             cursor: pointer;
             margin: 5px;
         }
-        .export-button {
-            background-color: #2196F3;
-        }
-        .import-button {
-            background-color: #f57c00;
-        }
+        .search-button { background-color: #4CAF50; }
+        .export-button { background-color: #2196F3; }
+        .import-button { background-color: #f57c00; }
         .product-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -44,7 +40,7 @@
             border: 1px solid #ddd;
             padding: 15px;
             border-radius: 5px;
-            position: relative;
+            text-align: center;
         }
         .product-image {
             width: 100%;
@@ -57,12 +53,6 @@
             padding: 20px;
             border-radius: 5px;
             margin-top: 30px;
-        }
-        .cart-total {
-            font-weight: bold;
-            font-size: 1.2em;
-            text-align: right;
-            margin-top: 15px;
         }
         .cart-item {
             display: flex;
@@ -80,16 +70,11 @@
         .cart-item-info {
             flex-grow: 1;
         }
-        .cart-item-info div {
-            margin-bottom: 5px;
-        }
-        .quantity-input {
-            width: 60px;
-            padding: 5px;
-            margin-bottom: 10px;
-        }
-        .quantity-selector {
-            margin: 10px 0;
+        .cart-total {
+            font-weight: bold;
+            font-size: 1.2em;
+            text-align: right;
+            margin-top: 15px;
         }
     </style>
 </head>
@@ -103,12 +88,10 @@
         </form>
     </div>
 
-    <!-- Botão de Exportar CSV -->
     <a href="/export">
         <button class="export-button">Exportar Carrinho (CSV)</button>
     </a>
 
-    <!-- Botão de Importar CSV -->
     <form action="/import" method="post" enctype="multipart/form-data">
         <input type="file" name="file" accept=".csv" required>
         <button type="submit" class="import-button">Importar CSV</button>
@@ -119,48 +102,33 @@
             {% for product in products %}
                 <div class="product-card">
                     <img src="{{ product.image }}" alt="{{ product.title }}" class="product-image">
-                    <div class="product-title">{{ product.title }}</div>
-                    <div class="product-price">${{ product.price }}</div>
-                    <div class="product-category">{{ product.category }}</div>
+                    <div><strong>{{ product.title }}</strong></div>
+                    <div>Preço: ${{ product.price }}</div>
                     <form method="POST">
                         <input type="hidden" name="product_id" value="{{ product.id }}">
-                        <div class="quantity-selector">
-                            <label for="quantity">Quantidade:</label>
-                            <input type="number" id="quantity" name="quantity" class="quantity-input" min="1" value="1">
-                        </div>
-                        <button type="submit" name="add_to_cart" class="cart-button">Adicionar ao Carrinho</button>
+                        <input type="number" name="quantity" min="1" value="1">
+                        <button type="submit" name="add_to_cart" class="cart-button">Adicionar</button>
                     </form>
                 </div>
             {% endfor %}
         </div>
-    {% else %}
-        <p>Nenhum produto encontrado. Tente outro termo de busca.</p>
     {% endif %}
 
-    <div class="cart-container">
-        <h2>Carrinho de Compras</h2>
-        {% if cart %}
+    {% if cart %}
+        <div class="cart-container">
+            <h2>Carrinho de Compras</h2>
             {% for item in cart.values() %}
                 <div class="cart-item">
-                    <img src="{{ item.image }}" alt="{{ item.title }}" class="cart-item-image">
-                    <div class="cart-item-info">
-                        <div>{{ item.title }}</div>
-                        <div>Quantidade: {{ item.quantity }}</div>
-                        <div>Preço unitário: ${{ item.price }}</div>
-                        <div>Subtotal: ${{ "%.2f"|format(item.price * item.quantity) }}</div>
-                    </div>
+                    <img src="{{ item.image }}" class="cart-item-image">
+                    <div>{{ item.title }} (x{{ item.quantity }})</div>
                     <form method="POST">
                         <input type="hidden" name="product_id" value="{{ item.id }}">
-                        <button type="submit" name="remove_from_cart" class="remove-button">Remover 1</button>
+                        <button type="submit" name="remove_from_cart" class="remove-button">Remover</button>
                     </form>
                 </div>
             {% endfor %}
-            <div class="cart-total">
-                Total: ${{ "%.2f"|format(cart_total) }}
-            </div>
-        {% else %}
-            <p>Seu carrinho está vazio.</p>
-        {% endif %}
-    </div>
+            <div class="cart-total">Total: ${{ cart_total }}</div>
+        </div>
+    {% endif %}
 </body>
 </html>
