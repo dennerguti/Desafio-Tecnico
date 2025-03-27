@@ -11,6 +11,12 @@
             margin: 0 auto;
             padding: 20px;
         }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
         .search-container {
             margin-bottom: 30px;
         }
@@ -19,7 +25,7 @@
             width: 300px;
             font-size: 16px;
         }
-        .search-button, .cart-button, .remove-button, .export-button, .import-button {
+        .search-button, .cart-button, .remove-button, .export-button, .import-button, .logout-button {
             padding: 10px 20px;
             font-size: 16px;
             color: white;
@@ -30,6 +36,7 @@
         .search-button { background-color: #4CAF50; }
         .export-button { background-color: #2196F3; }
         .import-button { background-color: #f57c00; }
+        .logout-button { background-color: #f44336; }
         .product-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -76,10 +83,23 @@
             text-align: right;
             margin-top: 15px;
         }
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
-    <h1>Loja API</h1>
+    <div class="header">
+        <h1>Loja API</h1>
+        <div>
+            <span>Bem-vindo, {{ session['username'] }}!</span>
+            <a href="/logout">
+                <button class="logout-button">Sair</button>
+            </a>
+        </div>
+    </div>
 
     <div class="search-container">
         <form method="POST">
@@ -88,14 +108,16 @@
         </form>
     </div>
 
-    <a href="/export">
-        <button class="export-button">Exportar Carrinho (CSV)</button>
-    </a>
+    <div class="button-group">
+        <a href="/export">
+            <button class="export-button">Exportar Carrinho (CSV)</button>
+        </a>
 
-    <form action="/import" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept=".csv" required>
-        <button type="submit" class="import-button">Importar CSV</button>
-    </form>
+        <form action="/import" method="post" enctype="multipart/form-data" style="display: inline;">
+            <input type="file" name="file" accept=".csv" required>
+            <button type="submit" class="import-button">Importar CSV</button>
+        </form>
+    </div>
 
     {% if products %}
         <div class="product-grid">
@@ -117,17 +139,22 @@
     {% if cart %}
         <div class="cart-container">
             <h2>Carrinho de Compras</h2>
-            {% for item in cart.values() %}
+            {% for item in cart %}
                 <div class="cart-item">
                     <img src="{{ item.image }}" class="cart-item-image">
-                    <div>{{ item.title }} (x{{ item.quantity }})</div>
+                    <div class="cart-item-info">
+                        <div>{{ item.title }}</div>
+                        <div>Quantidade: {{ item.quantity }}</div>
+                        <div>Preço unitário: ${{ item.price }}</div>
+                        <div>Subtotal: ${{ "%.2f"|format(item.price * item.quantity) }}</div>
+                    </div>
                     <form method="POST">
-                        <input type="hidden" name="product_id" value="{{ item.id }}">
+                        <input type="hidden" name="product_id" value="{{ item.product_id }}">
                         <button type="submit" name="remove_from_cart" class="remove-button">Remover</button>
                     </form>
                 </div>
             {% endfor %}
-            <div class="cart-total">Total: ${{ cart_total }}</div>
+            <div class="cart-total">Total: ${{ "%.2f"|format(cart_total) }}</div>
         </div>
     {% endif %}
 </body>
