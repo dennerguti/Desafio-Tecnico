@@ -155,7 +155,6 @@
                         <div>Quantidade: {{ item.quantity }}</div>
                         <div>Preço unitário: ${{ item.price }}</div>
                         <div>Subtotal: ${{ "%.2f"|format(item.price * item.quantity) }}</div>
-                        <div>{{ item.description }}</div>
                     </div>
                     <form method="POST">
                         <input type="hidden" name="product_id" value="{{ item.id }}">
@@ -166,6 +165,9 @@
             <div class="cart-total">
                 Total: ${{ "%.2f"|format(cart_total) }}
             </div>
+            <form action="/export" method="GET">
+                <button type="submit" class="cart-button">Exportar CSV</button>
+            </form>
         {% else %}
             <p>Seu carrinho está vazio.</p>
         {% endif %}
