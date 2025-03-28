@@ -1,17 +1,22 @@
-from flask import Flask, render_template, request, session, send_file, redirect, url_for
+from flask import Flask, render_template, request, send_file, redirect, url_for, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import requests
 import csv
 import io
 import os
+import jwt
+import datetime
+from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)  
+app.secret_key = os.urandom(24)
 
-# Configuração do banco de dados
+# Configuração do banco de dados e JWT
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_SECRET_KEY'] = os.urandom(24)  # Chave secreta para JWT
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=1)  # Tempo de expiração do token
 db = SQLAlchemy(app)
 
 BASE_URL = "https://fakestoreapi.com"
@@ -40,12 +45,41 @@ class CartItem(db.Model):
 # Criar banco de dados e tabelas
 with app.app_context():
     db.create_all()
-    # Arrumar essa senha
     if not User.query.filter_by(username='admin').first():
         admin = User(username='admin')
-        admin.set_password('123456')
+        admin.set_password('123456')  # Mudar isso depois
         db.session.add(admin)
         db.session.commit()
+
+# Decorator para verificar o token JWT
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        
+        if 'token' in request.args:
+            token = request.args.get('token')
+        elif request.method == 'POST' and 'token' in request.form:
+            token = request.form['token']
+        elif 'Authorization' in request.headers:
+            token = request.headers['Authorization'].split(" ")[1]
+        elif 'token' in request.cookies:
+            token = request.cookies.get('token')
+        
+        if not token:
+            return jsonify({'message': 'Token está faltando!'}), 401
+        
+        try:
+            data = jwt.decode(token, app.config['JWT_SECRET_KEY'], algorithms=["HS256"])
+            current_user = User.query.get(data['user_id'])
+        except jwt.ExpiredSignatureError:
+            return jsonify({'message': 'Token expirado!'}), 401
+        except:
+            return jsonify({'message': 'Token é inválido!'}), 401
+        
+        return f(current_user, *args, **kwargs)
+    
+    return decorated
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -56,9 +90,15 @@ def login():
         user = User.query.filter_by(username=username).first()
         
         if user and user.check_password(password):
-            session['user_id'] = user.id
-            session['username'] = user.username
-            return redirect(url_for('index'))
+
+            token = jwt.encode({
+                'user_id': user.id,
+                'exp': datetime.datetime.utcnow() + app.config['JWT_ACCESS_TOKEN_EXPIRES']
+            }, app.config['JWT_SECRET_KEY'])
+            
+            response = make_response(redirect(url_for('index', token=token)))
+            response.set_cookie('token', token)
+            return response
         else:
             return render_template('login.html', error="Credenciais inválidas")
     
@@ -66,16 +106,15 @@ def login():
 
 @app.route('/logout')
 def logout():
-    session.clear()
-    return redirect(url_for('login'))
+    response = make_response(redirect(url_for('login')))
+    response.delete_cookie('token')
+    return response
 
 @app.route('/api', methods=['GET', 'POST'])
-def index():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    
-    user_id = session['user_id']
+@token_required
+def index(current_user):
     search_query = request.form.get('search', '')
+    user_id = current_user.id
 
     if search_query:
         response = requests.get(f"{BASE_URL}/products")
@@ -92,7 +131,6 @@ def index():
             quantity = int(request.form.get('quantity', 1))
             product = requests.get(f"{BASE_URL}/products/{product_id}").json()
 
-            # Verificar se o produto já está no carrinho
             cart_item = CartItem.query.filter_by(user_id=user_id, product_id=product_id).first()
             
             if cart_item:
@@ -123,21 +161,25 @@ def index():
     cart_items = CartItem.query.filter_by(user_id=user_id).all()
     cart_total = sum(item.price * item.quantity for item in cart_items)
 
-    return render_template(
+    response = make_response(render_template(
         'index.html',
         products=products,
         cart=cart_items,
         cart_total=cart_total,
-        search_query=search_query
-    )
+        search_query=search_query,
+        username=current_user.username
+    ))
+    
+    token = request.args.get('token')
+    if token:
+        response.set_cookie('token', token)
+    
+    return response
 
 @app.route('/export')
-def export_cart():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    
-    user_id = session['user_id']
-    cart_items = CartItem.query.filter_by(user_id=user_id).all()
+@token_required
+def export_cart(current_user):
+    cart_items = CartItem.query.filter_by(user_id=current_user.id).all()
 
     output = io.StringIO()
     writer = csv.writer(output)
@@ -155,31 +197,28 @@ def export_cart():
     )
 
 @app.route('/import', methods=['POST'])
-def import_cart():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    
-    user_id = session['user_id']
-    
+@token_required
+def import_cart(current_user):
     if 'file' not in request.files:
-        return "Nenhum arquivo enviado", 400  
+        return "Nenhum arquivo enviado", 400
 
     file = request.files['file']
     if file.filename == '':
-        return "Nenhum arquivo selecionado", 400  
+        return "Nenhum arquivo selecionado", 400
 
-    CartItem.query.filter_by(user_id=user_id).delete()
+    # Limpar carrinho atual
+    CartItem.query.filter_by(user_id=current_user.id).delete()
     
     reader = csv.reader(io.StringIO(file.read().decode()), delimiter=",")
-    next(reader) 
+    next(reader)  # Pular cabeçalho
 
     for row in reader:
         if len(row) < 5:
-            continue  
+            continue
 
         product_id, title, price, quantity, image = row
         new_item = CartItem(
-            user_id=user_id,
+            user_id=current_user.id,
             product_id=product_id,
             title=title,
             price=float(price),

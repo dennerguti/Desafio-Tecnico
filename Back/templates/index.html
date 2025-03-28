@@ -89,12 +89,49 @@
             margin-bottom: 20px;
         }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se há um token na URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            
+            if (token) {
+                // Armazenar o token no localStorage
+                localStorage.setItem('jwt_token', token);
+                
+                // Configurar o token para requisições fetch/axios
+                if (typeof axios !== 'undefined') {
+                    axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+                }
+                
+                // Remover o token da URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            
+            // Configurar o token em todos os forms
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const token = localStorage.getItem('jwt_token');
+                    if (token) {
+                        // Adicionar um campo hidden com o token
+                        if (!form.querySelector('input[name="token"]')) {
+                            const input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'token';
+                            input.value = token;
+                            form.appendChild(input);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="header">
         <h1>Loja API</h1>
         <div>
-            <span>Bem-vindo, {{ session['username'] }}!</span>
+            <span>Bem-vindo, {{ username }}!</span>
             <a href="/logout">
                 <button class="logout-button">Sair</button>
             </a>
