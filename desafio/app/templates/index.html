@@ -3,93 +3,570 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loja API</title>
+    <title>Vallorando Cart</title>
     <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-hover: #3a56d4;
+            --success-color: #4CAF50;
+            --info-color: #2196F3;
+            --warning-color: #f57c00;
+            --danger-color: #f44336;
+            --text-color: #2b2d42;
+            --light-gray: #f8f9fa;
+            --border-color: #e0e0e0;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
+        
+        /* Notificação */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            color: white;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            transform: translateX(200%);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background-color: var(--success-color);
+        }
+        
+        .notification.error {
+            background-color: var(--danger-color);
+        }
+        
+        .notification-icon {
+            font-size: 1.2rem;
+        }
+
+        /* Header Styles */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
         }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info span {
+            font-weight: 500;
+        }
+        
+        /* Button Styles */
+        .btn {
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .btn-info {
+            background-color: var(--info-color);
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        /* Search Section */
         .search-container {
             margin-bottom: 30px;
         }
+        
+        .search-form {
+            display: flex;
+            gap: 10px;
+            max-width: 600px;
+        }
+        
         .search-box {
-            padding: 10px;
-            width: 300px;
-            font-size: 16px;
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
         }
-        .search-button, .cart-button, .remove-button, .export-button, .import-button, .logout-button {
-            padding: 10px 20px;
-            font-size: 16px;
-            color: white;
-            border: none;
-            cursor: pointer;
-            margin: 5px;
+        
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
         }
-        .search-button { background-color: #4CAF50; }
-        .export-button { background-color: #2196F3; }
-        .import-button { background-color: #f57c00; }
-        .logout-button { background-color: #f44336; }
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
             margin-bottom: 30px;
+            align-items: center;
         }
-        .product-card {
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 5px;
-            text-align: center;
-        }
-        .product-image {
-            width: 100%;
-            height: 200px;
-            object-fit: contain;
-            margin-bottom: 10px;
-        }
-        .cart-container {
-            border: 1px solid #ddd;
-            padding: 20px;
-            border-radius: 5px;
-            margin-top: 30px;
-        }
-        .cart-item {
+        
+        .file-upload-group {
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
+            gap: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
         }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input-button {
+            padding: 10px 20px;
+            background-color: var(--warning-color);
+            color: white;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-input-button:hover {
+            background-color: #e67300;
+        }
+
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-name {
+            margin-left: 10px;
+            font-size: 0.9rem;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+        
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .product-image-container {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--light-gray);
+            padding: 15px;
+        }
+        
+        .product-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .product-info {
+            padding: 20px;
+        }
+        
+        .product-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .product-price {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+        
+        .product-form {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .quantity-input {
+            width: 70px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+        
+        /* Cart Styles */
+        .cart-container {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+            margin-top: 40px;
+        }
+        
+        .cart-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .cart-item {
+            display: flex;
+            gap: 20px;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        
         .cart-item-image {
             width: 80px;
             height: 80px;
             object-fit: contain;
-            margin-right: 15px;
+            border-radius: 8px;
+            background: var(--light-gray);
+            padding: 5px;
         }
-        .cart-item-info {
-            flex-grow: 1;
+        
+        .cart-item-details {
+            flex: 1;
         }
-        .cart-total {
-            font-weight: bold;
-            font-size: 1.2em;
-            text-align: right;
-            margin-top: 15px;
+        
+        .cart-item-title {
+            font-weight: 600;
+            margin-bottom: 5px;
         }
-        .button-group {
+        
+        .cart-item-meta {
             display: flex;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
+            gap: 15px;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .cart-item-subtotal {
+            font-weight: 600;
+        }
+        
+        .cart-total {
+            text-align: right;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border-color);
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .search-form {
+                width: 100%;
+            }
+            
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+            
+            .cart-item {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .cart-item-image {
+                align-self: center;
+            }
+
+            .file-upload-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .file-name {
+                max-width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-form {
+                flex-direction: column;
+            }
+            
+            .quantity-input {
+                width: 100%;
+            }
         }
     </style>
+</head>
+<body>
+    <!-- Notificação -->
+    <div id="notification" class="notification" style="display: none;">
+        <span class="notification-icon">✓</span>
+        <span id="notification-message">Mensagem de notificação</span>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Vallorando Cart</h1>
+            <div class="user-info">
+                <span>Bem-vindo, {{ username }}!</span>
+                <a href="/logout" class="btn btn-danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
+                        <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
+                    </svg>
+                    Sair
+                </a>
+            </div>
+        </header>
+
+        <div class="search-container">
+            <form method="POST" class="search-form">
+                <input type="text" name="search" class="search-box" placeholder="Pesquisar produtos..." value="{{ search_query }}" aria-label="Pesquisar produtos">
+                <button type="submit" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                    </svg>
+                    Buscar
+                </button>
+            </form>
+        </div>
+
+        <div class="action-buttons">
+            <a href="/export" class="btn btn-info">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8.5 6.5a.5.5 0 0 0-1 0v3.793L6.354 9.146a.5.5 0 1 0-.708.708l2 2a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L8.5 10.293V6.5z"/>
+                    <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+                </svg>
+                Exportar Carrinho
+            </a>
+
+            <form action="/import" method="post" enctype="multipart/form-data" id="import-form" class="file-upload-group">
+                <div class="file-input-wrapper">
+                    <button type="button" class="file-input-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8.5 1.5A1.5 1.5 0 0 1 10 0h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h6c-.314.418-.5.937-.5 1.5v7.793L4.854 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 9.293V1.5z"/>
+                        </svg>
+                        Selecionar CSV
+                    </button>
+                    <input type="file" name="file" accept=".csv" required class="file-input" id="csv-file">
+                </div>
+                <span class="file-name" id="file-name">Nenhum arquivo selecionado</span>
+                <button type="submit" class="btn btn-warning">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                        <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+                    </svg>
+                    Importar
+                </button>
+            </form>
+        </div>
+
+        {% if products %}
+            <div class="product-grid">
+                {% for product in products %}
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            <img src="{{ product.image }}" alt="{{ product.title }}" class="product-image">
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-title">{{ product.title }}</h3>
+                            <div class="product-price">${{ product.price }}</div>
+                            <form method="POST" class="product-form">
+                                <input type="number" name="quantity" min="1" value="1" class="quantity-input">
+                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                <button type="submit" name="add_to_cart" class="btn btn-success">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                                    </svg>
+                                    Adicionar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if cart %}
+            <div class="cart-container">
+                <h2 class="cart-title">Carrinho de Compras</h2>
+                {% for item in cart %}
+                    <div class="cart-item">
+                        <img src="{{ item.image }}" alt="{{ item.title }}" class="cart-item-image">
+                        <div class="cart-item-details">
+                            <h3 class="cart-item-title">{{ item.title }}</h3>
+                            <div class="cart-item-meta">
+                                <span>Quantidade: {{ item.quantity }}</span>
+                                <span>Preço unitário: ${{ item.price }}</span>
+                            </div>
+                            <div class="cart-item-subtotal">Subtotal: ${{ "%.2f"|format(item.price * item.quantity) }}</div>
+                        </div>
+                        <form method="POST">
+                            <input type="hidden" name="product_id" value="{{ item.product_id }}">
+                            <button type="submit" name="remove_from_cart" class="btn btn-danger">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                    <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                </svg>
+                                Remover
+                            </button>
+                        </form>
+                    </div>
+                {% endfor %}
+                <div class="cart-total">Total: ${{ "%.2f"|format(cart_total) }}</div>
+            </div>
+        {% endif %}
+    </div>
+
     <script>
+        // Função para mostrar notificação
+        function showNotification(message, isSuccess) {
+            const notification = document.getElementById('notification');
+            const notificationMessage = document.getElementById('notification-message');
+            
+            notification.className = isSuccess ? 'notification success' : 'notification error';
+            notificationMessage.textContent = message;
+            notification.style.display = 'flex';
+            
+            // Mostrar notificação
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // Esconder após 5 segundos
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 300);
+            }, 5000);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // Verificar se há um token na URL
             const urlParams = new URLSearchParams(window.location.search);
@@ -105,6 +582,19 @@
                 }
                 
                 // Remover o token da URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            
+            // Verificar se há mensagens de importação na URL
+            const importStatus = urlParams.get('import');
+            
+            if (importStatus === 'success') {
+                showNotification('CSV importado com sucesso!', true);
+                // Limpar parâmetro da URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (importStatus === 'error') {
+                showNotification('Não foi possível importar o CSV', false);
+                // Limpar parâmetro da URL
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
             
@@ -124,75 +614,29 @@
                     }
                 });
             });
+            
+            // Configurar o input de arquivo CSV
+            const fileInput = document.getElementById('csv-file');
+            const fileNameDisplay = document.getElementById('file-name');
+            
+            fileInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    fileNameDisplay.textContent = this.files[0].name;
+                } else {
+                    fileNameDisplay.textContent = 'Nenhum arquivo selecionado';
+                }
+            });
+            
+            // Validar o formulário de importação
+            const importForm = document.getElementById('import-form');
+            importForm.addEventListener('submit', function(e) {
+                if (fileInput.files.length === 0) {
+                    e.preventDefault();
+                    showNotification('Por favor, selecione um arquivo CSV para importar', false);
+                    fileInput.focus();
+                }
+            });
         });
     </script>
-</head>
-<body>
-    <div class="header">
-        <h1>Loja API</h1>
-        <div>
-            <span>Bem-vindo, {{ username }}!</span>
-            <a href="/logout">
-                <button class="logout-button">Sair</button>
-            </a>
-        </div>
-    </div>
-
-    <div class="search-container">
-        <form method="POST">
-            <input type="text" name="search" class="search-box" placeholder="Pesquisar produtos..." value="{{ search_query }}">
-            <button type="submit" class="search-button">Buscar</button>
-        </form>
-    </div>
-
-    <div class="button-group">
-        <a href="/export">
-            <button class="export-button">Exportar Carrinho (CSV)</button>
-        </a>
-
-        <form action="/import" method="post" enctype="multipart/form-data" style="display: inline;">
-            <input type="file" name="file" accept=".csv" required>
-            <button type="submit" class="import-button">Importar CSV</button>
-        </form>
-    </div>
-
-    {% if products %}
-        <div class="product-grid">
-            {% for product in products %}
-                <div class="product-card">
-                    <img src="{{ product.image }}" alt="{{ product.title }}" class="product-image">
-                    <div><strong>{{ product.title }}</strong></div>
-                    <div>Preço: ${{ product.price }}</div>
-                    <form method="POST">
-                        <input type="hidden" name="product_id" value="{{ product.id }}">
-                        <input type="number" name="quantity" min="1" value="1">
-                        <button type="submit" name="add_to_cart" class="cart-button">Adicionar</button>
-                    </form>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
-    {% if cart %}
-        <div class="cart-container">
-            <h2>Carrinho de Compras</h2>
-            {% for item in cart %}
-                <div class="cart-item">
-                    <img src="{{ item.image }}" class="cart-item-image">
-                    <div class="cart-item-info">
-                        <div>{{ item.title }}</div>
-                        <div>Quantidade: {{ item.quantity }}</div>
-                        <div>Preço unitário: ${{ item.price }}</div>
-                        <div>Subtotal: ${{ "%.2f"|format(item.price * item.quantity) }}</div>
-                    </div>
-                    <form method="POST">
-                        <input type="hidden" name="product_id" value="{{ item.product_id }}">
-                        <button type="submit" name="remove_from_cart" class="remove-button">Remover</button>
-                    </form>
-                </div>
-            {% endfor %}
-            <div class="cart-total">Total: ${{ "%.2f"|format(cart_total) }}</div>
-        </div>
-    {% endif %}
 </body>
 </html>

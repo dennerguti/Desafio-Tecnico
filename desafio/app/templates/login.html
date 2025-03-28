@@ -3,30 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login | Sistema</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-        form { display: inline-block; text-align: left; background: #f4f4f4; padding: 20px; border-radius: 8px; }
-        input { display: block; width: 100%; margin-bottom: 10px; padding: 8px; }
-        button { width: 100%; padding: 10px; background: #28a745; color: white; border: none; cursor: pointer; }
-        button:hover { background: #218838; }
-        .error { color: red; margin-top: 10px; }
-        .logout-message { color: green; margin-top: 10px; }
+        :root {
+            --primary-color: #4361ee;
+            --primary-hover: #3a56d4;
+            --error-color: #ef233c;
+            --success-color: #2b9348;
+            --text-color: #2b2d42;
+            --light-gray: #f8f9fa;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .login-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+        
+        .login-header h2 {
+            font-weight: 600;
+            font-size: 1.8rem;
+        }
+        
+        .login-form {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .message {
+            padding: 12px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        .error {
+            background-color: rgba(239, 35, 60, 0.1);
+            color: var(--error-color);
+            border: 1px solid rgba(239, 35, 60, 0.3);
+        }
+        
+        .success {
+            background-color: rgba(43, 147, 72, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(43, 147, 72, 0.3);
+        }
+        
+        .footer-links {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        .footer-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .password-container {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6c757d;
+        }
+        
+        @media (max-width: 480px) {
+            .login-container {
+                max-width: 100%;
+            }
+            
+            .login-form {
+                padding: 20px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h2>Login</h2>
-    {% if error %}
-        <div class="error">{{ error }}</div>
-    {% endif %}
-    <form method="POST">
-        <label for="username">Usuário:</label>
-        <input type="text" id="username" name="username" required>
+    <div class="login-container">
+        <div class="login-header">
+            <h2>Vallorando Cart</h2>
+            <p>Faça login para continuar</p>
+        </div>
         
-        <label for="password">Senha:</label>
-        <input type="password" id="password" name="password" required>
+        <div class="login-form">
+            {% if error %}
+                <div class="message error">{{ error }}</div>
+            {% endif %}
+            
+            {% if success %}
+                <div class="message success">{{ success }}</div>
+            {% endif %}
+            
+            <form method="POST">
+                <div class="form-group">
+                    <label for="username">Usuário</label>
+                    <input type="text" id="username" name="username" class="form-control" placeholder="Digite seu usuário" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <div class="password-container">
+                        <input type="password" id="password" name="password" class="form-control" placeholder="Digite sua senha" required>
+                        <span class="toggle-password" onclick="togglePasswordVisibility()">👁️</span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn">Entrar</button>
+            </form>
+        </div>
+    </div>
 
-        <button type="submit">Entrar</button>
-    </form>
+    <script>
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+        }
+    </script>
 </body>
 </html>
